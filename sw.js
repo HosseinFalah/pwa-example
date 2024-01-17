@@ -1,4 +1,14 @@
-const cacheVersion = 1;
+const limitInCache = (key, size) => {
+    caches.open(key).then(cache => {
+        cache.keys().then(keys => {
+            if (keys.length > size) {
+                cache.delete(keys[0]).then(limitInCache(key, size));
+            }
+        })
+    })
+}
+
+const cacheVersion = 2;
 
 const activeCaches = {
     static: `static-v${cacheVersion}`,
@@ -52,6 +62,7 @@ self.addEventListener("fetch", (event) => {
           return fetch(event.request).then((serverResponse) => {
             caches.open([activeCaches["dynamic"]]).then((cache) => {
               cache.put(event.request, serverResponse.clone());
+              limitInCache(activeCaches['dynamic'], 5);
               return serverResponse;
             });
           }).catch((err) => {
