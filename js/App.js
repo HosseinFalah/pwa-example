@@ -12,16 +12,21 @@ if ('serviceWorker' in navigator) {
 // main logix
 
 const getProducts = async () => {
-    const res = await fetch('https://pwa-app-24407-default-rtdb.firebaseio.com/courses.json');
-    const data = await res.json();
-
-    const courses = [];
-
-    for (let course in data) {
-        courses.push(data[course]);
-    };
-
-    return courses;
+    try {
+        const res = await fetch('https://pwa-app-24407-default-rtdb.firebaseio.com/courses.json');
+        const data = await res.json();
+    
+        const courses = [];
+    
+        for (let course in data) {
+            courses.push(data[course]);
+        };
+    
+        return courses;
+    } catch (error) {
+        const data = await db.courses.toArray();
+        return data;
+    }
 }
 
 const generateProduct = (products) => {

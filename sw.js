@@ -11,7 +11,7 @@ const limitInCache = (key, size) => {
     })
 }
 
-const cacheVersion = 1;
+const cacheVersion = 2;
 
 const activeCaches = {
     static: `static-v${cacheVersion}`,
