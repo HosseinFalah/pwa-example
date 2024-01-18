@@ -8,7 +8,7 @@ const limitInCache = (key, size) => {
     })
 }
 
-const cacheVersion = 2;
+const cacheVersion = 3;
 
 const activeCaches = {
     static: `static-v${cacheVersion}`,
@@ -50,27 +50,34 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
-    console.log(event.request);
+    const urls = ['https://fakestoreapi.com/products?limit=6'];
 
-    // 1. First Cache, second network
+    if (urls.includes(event.request.url)) {
+        return event.respondWith(
+            fetch(event.request).then(res => {
+                return res;
+            })
+        )
+    } else {
+        // 1. First Cache, second network
 
-    event.respondWith(
-      caches.match(event.request).then((response) => {
-        if (response) {
-          return response;
-        } else {
-          return fetch(event.request).then((serverResponse) => {
-            caches.open([activeCaches["dynamic"]]).then((cache) => {
-              cache.put(event.request, serverResponse.clone());
-              limitInCache(activeCaches['dynamic'], 5);
-              return serverResponse;
-            });
-          }).catch((err) => {
-              return caches.match('/fallback.html')
-          })
-        }
-      })
-    );
+        event.respondWith(
+            caches.match(event.request).then((response) => {
+                if (response) {
+                    return response;
+                } else {
+                    return fetch(event.request).then((serverResponse) => {
+                        return caches.open([activeCaches["dynamic"]]).then((cache) => {
+                            cache.put(event.request, serverResponse.clone());
+                            return serverResponse;
+                        });
+                    }).catch((err) => {
+                        return caches.match('/fallback.html')
+                    })
+                }
+            })
+        );
+    }
 
     // 2. Network Only
     // event.respondWith(fetch(event.request));
