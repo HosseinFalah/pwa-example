@@ -11,7 +11,7 @@ const limitInCache = (key, size) => {
     })
 }
 
-const cacheVersion = 2;
+const cacheVersion = 1;
 
 const activeCaches = {
     static: `static-v${cacheVersion}`,
@@ -108,3 +108,17 @@ self.addEventListener("fetch", (event) => {
     //         })
     // );
 });
+
+self.addEventListener('sync', (event) => {
+    if (event.tag === "add-new-course") {
+        createNewCourse()
+    } else if (event.tag === "remove-course") {
+        
+    }
+    console.log(event);
+    console.log(event.tag);
+})
+
+function createNewCourse(){
+    console.log('Create new Course SuccessFully');
+}

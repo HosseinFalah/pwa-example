@@ -1,5 +1,6 @@
-// register services worker
+const addCourse = document.querySelector('#add-course');
 
+// register services worker
 if ('serviceWorker' in navigator) {
     console.log("Support");
     navigator.serviceWorker.register('/sw.js').then(register => {
@@ -45,6 +46,29 @@ const generateProduct = (products) => {
         `)
     });
 }
+
+const addNewCourse = () => {
+    if ('serviceWorker' in navigator && 'SyncManager' in window) {
+        navigator.serviceWorker.ready.then(sw => {
+            const newCourse = {
+                id: 4,
+                title: 'Next Expert'
+            }
+    
+            db.syncCourses.put(newCourse)
+                .then(data => console.log(data, 'new Course Insert SuccessFully'))
+                .catch(err => console.log(err))
+
+            return sw.sync.register('add-new-course')
+                .then(() => console.log('task add successfully'))
+                .catch(err => console.log(err))
+        })
+    } else {
+        console.log('not support');
+    }
+}
+
+addCourse.addEventListener('click', () => addNewCourse());
 
 document.addEventListener('DOMContentLoaded', async () => {
     const products = await getProducts();
