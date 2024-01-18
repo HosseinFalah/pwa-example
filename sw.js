@@ -1,3 +1,6 @@
+importScripts('/js/dexie.js');
+importScripts('/js/db.js');
+
 const limitInCache = (key, size) => {
     caches.open(key).then(cache => {
         cache.keys().then(keys => {
@@ -8,7 +11,7 @@ const limitInCache = (key, size) => {
     })
 }
 
-const cacheVersion = 3;
+const cacheVersion = 1;
 
 const activeCaches = {
     static: `static-v${cacheVersion}`,
@@ -24,7 +27,6 @@ self.addEventListener("install", (event) => {
                 "/",
                 "/fallback.html",
                 "js/App.js",
-                "js/code.js",
                 "css/app.css",
             ]);
         })
@@ -50,12 +52,19 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
-    const urls = ['https://fakestoreapi.com/products?limit=6'];
+    const urls = ['https://pwa-app-24407-default-rtdb.firebaseio.com/courses.json'];
 
     if (urls.includes(event.request.url)) {
         return event.respondWith(
-            fetch(event.request).then(res => {
-                return res;
+            fetch(event.request).then(response => {
+                const clonedResponse = response.clone();
+                clonedResponse.json().then(data => {
+                    for (let course in data) {
+                        db.courses.put(data[course]);
+                    }
+                })
+
+                return response;
             })
         )
     } else {

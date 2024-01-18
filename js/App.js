@@ -12,9 +12,16 @@ if ('serviceWorker' in navigator) {
 // main logix
 
 const getProducts = async () => {
-    const res = await fetch('https://fakestoreapi.com/products?limit=6');
+    const res = await fetch('https://pwa-app-24407-default-rtdb.firebaseio.com/courses.json');
     const data = await res.json();
-    return data
+
+    const courses = [];
+
+    for (let course in data) {
+        courses.push(data[course]);
+    };
+
+    return courses;
 }
 
 const generateProduct = (products) => {
@@ -24,10 +31,9 @@ const generateProduct = (products) => {
         wrapperProducts.insertAdjacentHTML('beforeend', `
             <div class="col">
                 <div class="card bg-dark-subtle">
-                    <img src=${product.image} class="card-img-top" alt="cleanCode">
+                    <img src="/assets/Images/Nextjs.webp" class="card-img-top" alt="cleanCode">
                     <div class="card-body">
                         <h5 class="card-title">${product.title}</h5>
-                        <p class="card-text">${product.description}</p>
                     </div>
                 </div>
             </div>
@@ -37,5 +43,5 @@ const generateProduct = (products) => {
 
 document.addEventListener('DOMContentLoaded', async () => {
     const products = await getProducts();
-    generateProduct(products)
+    generateProduct(products);
 })
