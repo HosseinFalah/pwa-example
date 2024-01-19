@@ -1,4 +1,5 @@
 const addCourse = document.querySelector('#add-course');
+const showNotification = document.querySelector('#show-notification');
 
 // register services worker
 if ('serviceWorker' in navigator) {
@@ -68,7 +69,38 @@ const addNewCourse = () => {
     }
 }
 
+const showNotfication = async () => {
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.ready.then(sw => {
+            sw.showNotification('welcome to shopping', {
+                body: 'please add new course',
+                vibrate: [100, 50, 200],
+                icon: '/assets/Images/logo.svg',
+                badge: '/assets/Images/logo.svg',
+                image: '/assets/Images/logo.svg',
+                tag: 'test-notfication',
+                actions: [
+                    { action: 'confirm', title: 'Reply' },
+                    { action: 'cancel', title: 'Like ❤️' }
+                ]
+            })
+        })
+    }
+}
+
+const getNotficationPermission = async () => {
+    const result = await Notification.requestPermission();
+
+    if (result === 'granted') {
+        showNotfication();
+        console.log('permission granted');
+    } else if (result === 'denied') {
+        console.log('permission denied');
+    }
+}
+
 addCourse.addEventListener('click', () => addNewCourse());
+showNotification.addEventListener('click', () => getNotficationPermission());
 
 document.addEventListener('DOMContentLoaded', async () => {
     const products = await getProducts();
