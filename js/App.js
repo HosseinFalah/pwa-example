@@ -1,5 +1,9 @@
 const addCourse = document.querySelector('#add-course');
 const showNotification = document.querySelector('#show-notification');
+const cameraVideo = document.querySelector('.camera-video');
+const canvasElem = document.querySelector('.canvas');
+const tackPhoto = document.querySelector('.tack-photo');
+const showLocation = document.querySelector('#show-location');
 
 // register services worker
 if ('serviceWorker' in navigator) {
@@ -133,10 +137,71 @@ const getNotficationPermission = async () => {
     }
 }
 
+const getMediaPermission = async () => {
+    if ('getUserMedia' in navigator) {
+        const strim = await navigator.mediaDevices.getUserMedia({ video: true });
+        if (strim) {
+            cameraVideo.srcObject = strim
+        }
+
+    }
+}
+
+const getPhoto = () => {
+    const context = canvasElem.getContext('2d');
+    canvasElem.style.display = 'block';
+    cameraVideo.style.display = 'none';
+    tackPhoto.style.display = 'none';
+    context.drawImage(cameraVideo, 0, 0, canvasElem.width, 525);
+
+    cameraVideo.srcObject.getTracks().forEach(track => {
+        console.log(track);
+        track.stop();
+    })
+}
+
+const hasCameraDevice = async () => {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    let hasDevice = false;
+
+    devices.forEach(device => {
+        if (device.kind === 'videoinput') {
+            hasDevice = !hasDevice;
+        }
+    })
+
+    return hasDevice;
+}
+
+const geoSuccessCallback = (posotion) => {
+    console.log(posotion.coords.longitude);
+    console.log(posotion.coords.latitude);
+}
+
+const geoErrorCallback = (error) => {
+    console.log('error', error);
+}
+
+const getLocation = async () => {
+    if ('geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition(
+            geoSuccessCallback,
+            geoErrorCallback
+        )
+    }
+}
+
 addCourse.addEventListener('click', () => addNewCourse());
 showNotification.addEventListener('click', () => getNotficationPermission());
+tackPhoto.addEventListener('click', () => getPhoto());
+showLocation.addEventListener('click', () => getLocation());
 
 document.addEventListener('DOMContentLoaded', async () => {
     const products = await getProducts();
     generateProduct(products);
+    const hasDevice = await hasCameraDevice();
+
+    if (hasDevice) {
+        getMediaPermission();
+    }
 })

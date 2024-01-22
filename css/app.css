@@ -7,3 +7,7 @@
 body{
     font-family: "Vazirmatn";
 }
+
+.canvas{
+    display: none;
+}
