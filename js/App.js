@@ -69,10 +69,23 @@ const addNewCourse = () => {
     }
 }
 
+const urlBase64ToUint8Array = (base64String) => {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+
+    for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+}
+
 const showNotfication = async () => {
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.ready.then(sw => {
-            sw.showNotification('welcome to shopping', {
+            sw.showNotification('مرسی که اعتماد کردی', {
                 body: 'please add new course',
                 vibrate: [100, 50, 200],
                 icon: '/assets/Images/logo.svg',
@@ -88,12 +101,33 @@ const showNotfication = async () => {
     }
 }
 
+const getPushSubscription = async () => {
+    if ('serviceWorker' in navigator) {
+        const sw = await navigator.serviceWorker.ready;
+        const pushSubscription = await sw.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array('BMOltQK6AZYhVwLNMjMknBnmnQfGY94gXU3NUHqBZVDC2XFbK_1azXgHI7W9lRbOqmd8BNidm87_qpYvpOo4ExU')
+        });
+
+        return pushSubscription;
+    }
+}
+
+const getCurrentPushNotification = async () => {
+    const sw = await navigator.serviceWorker.ready;
+    const currentPushSubscription = await sw.pushManager.getSubscription();
+    return currentPushSubscription;
+}
+
 const getNotficationPermission = async () => {
     const result = await Notification.requestPermission();
 
     if (result === 'granted') {
         showNotfication();
-        console.log('permission granted');
+        const currentPushNotification = await getCurrentPushNotification();
+        if (!currentPushNotification) {
+            getPushSubscription();
+        }
     } else if (result === 'denied') {
         console.log('permission denied');
     }
